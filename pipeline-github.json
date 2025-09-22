@@ -1,0 +1,69 @@
+{
+  "pipeline": {
+    "name": "reto-api-pipeline-github",
+    "roleArn": "arn:aws:iam::211125755801:role/codepipeline-reto-role",
+    "artifactStore": { "type": "S3", "location": "mi-bucket-reto-api" },
+    "stages": [
+      {
+        "name": "Source",
+        "actions": [
+          {
+            "name": "Source",
+            "actionTypeId": {
+              "category": "Source",
+              "owner": "AWS",
+              "provider": "CodeStarSourceConnection",
+              "version": "1"
+            },
+            "outputArtifacts": [{ "name": "SourceOutput" }],
+            "configuration": {
+              "ConnectionArn": "arn:aws:codeconnections:us-east-1:211125755801:connection/9361b1db-8971-49c5-8eea-3c0ab259e940",
+              "FullRepositoryId": "pitagorass/reto_api_hexagonal",
+              "BranchName": "main"
+            },
+            "runOrder": 1
+          }
+        ]
+      },
+      {
+        "name": "Build",
+        "actions": [
+          {
+            "name": "Build",
+            "actionTypeId": {
+              "category": "Build",
+              "owner": "AWS",
+              "provider": "CodeBuild",
+              "version": "1"
+            },
+            "inputArtifacts": [{ "name": "SourceOutput" }],
+            "outputArtifacts": [{ "name": "BuildOutput" }],
+            "configuration": { "ProjectName": "reto-api-build" },
+            "runOrder": 1
+          }
+        ]
+      },
+      {
+        "name": "Deploy",
+        "actions": [
+          {
+            "name": "DeployToECS",
+            "actionTypeId": {
+              "category": "Deploy",
+              "owner": "AWS",
+              "provider": "ECS",
+              "version": "1"
+            },
+            "inputArtifacts": [{ "name": "BuildOutput" }],
+            "configuration": {
+              "ClusterName": "reto-cluster",
+              "ServiceName": "reto-api-svc"
+            },
+            "runOrder": 1
+          }
+        ]
+      }
+    ],
+    "version": 1
+  }
+}
