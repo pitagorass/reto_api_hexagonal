@@ -1,0 +1,59 @@
+# === SISTEMA / EDITORES ===
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.code-workspace
+
+# === PYTHON ===
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+ENV/
+env/
+.python-version
+.mypy_cache/
+.pytest_cache/
+coverage/
+htmlcov/
+.coverage
+coverage.xml
+.cache/
+.ruff_cache/
+pip-wheel-metadata/
+*.egg-info/
+build/
+dist/
+
+# === ENV FILES (no subir secretos) ===
+.env
+.env.*
+!.env.example
+*.env.local
+*.env.development
+*.env.production
+
+# === LOGS / TEMP ===
+*.log
+logs/
+tmp/
+*.swp
+*.swo
+
+# === DOCKER ===
+Dockerfile.*~
+docker-compose.override.yml
+.docker/
+# Artefacto generado por CodeBuild (no es necesario versionar)
+imagedefinitions.json
+
+# === TESTS ===
+.tox/
+.nox/
+.pyre/
+
+# === MISC ===
+*.bak
+*.tmp

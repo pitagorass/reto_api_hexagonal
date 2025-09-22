@@ -1,4 +1,6 @@
 from pydantic import BaseModel
+from typing import Optional
+from datetime import datetime
 
 class PersonaIn(BaseModel):
     identificacion: str
@@ -10,4 +12,4 @@ class PersonaOut(BaseModel):
     identificacion: str
     nombre: str
     email: str
-    created_at: str | None = None
+    created_at: Optional[datetime] = None
