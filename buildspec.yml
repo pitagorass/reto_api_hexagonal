@@ -1,0 +1,26 @@
+version: 0.2
+env:
+  variables:
+    AWS_DEFAULT_REGION: us-east-1
+phases:
+  pre_build:
+    commands:
+      - echo Logging in to Amazon ECR...
+      - aws --version
+      - $(aws ecr get-login --no-include-email --region $AWS_DEFAULT_REGION) || true
+      - IMAGE_TAG=${CODEBUILD_RESOLVED_SOURCE_VERSION:0:7}
+  build:
+    commands:
+      - echo Building the Docker image...
+      - docker build -t reto-api:$IMAGE_TAG .
+      - docker tag reto-api:$IMAGE_TAG $ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/reto-api:$IMAGE_TAG
+      - docker tag reto-api:$IMAGE_TAG $ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/reto-api:latest
+  post_build:
+    commands:
+      - echo Pushing the Docker image...
+      - docker push $ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/reto-api:$IMAGE_TAG
+      - docker push $ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/reto-api:latest
+      - printf '[{"name":"reto-api","imageUri":"%s"}]' "$ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/reto-api:$IMAGE_TAG" > imagedefinitions.json
+artifacts:
+  files:
+    - imagedefinitions.json
