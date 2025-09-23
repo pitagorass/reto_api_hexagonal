@@ -8,24 +8,29 @@ env:
 phases:
   pre_build:
     commands:
+      - set -euo pipefail
       - echo "Login ECR"
       - ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
       - ECR_URI="$ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO"
-      - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_URI
+      - aws ecr get-login-password --region "$AWS_REGION" | docker login --username AWS --password-stdin "$ECR_URI"
       - echo "Compute IMAGE_TAG from commit SHA"
+      - echo "CODEBUILD_RESOLVED_SOURCE_VERSION=$CODEBUILD_RESOLVED_SOURCE_VERSION"
       - IMAGE_TAG=$(echo "$CODEBUILD_RESOLVED_SOURCE_VERSION" | cut -c1-7)
       - echo "IMAGE_TAG=$IMAGE_TAG"
   build:
     commands:
+      - set -euo pipefail
       - echo "Build image"
-      - docker build -t $ECR_URI:$IMAGE_TAG .
-      - docker tag $ECR_URI:$IMAGE_TAG $ECR_URI:latest
+      - docker build -t "$ECR_URI:$IMAGE_TAG" .
+      - docker tag "$ECR_URI:$IMAGE_TAG" "$ECR_URI:latest"
   post_build:
     commands:
+      - set -euo pipefail
       - echo "Push image"
-      - docker push $ECR_URI:$IMAGE_TAG
-      - docker push $ECR_URI:latest
+      - docker push "$ECR_URI:$IMAGE_TAG"
+      - docker push "$ECR_URI:latest"
       - printf '[{"name":"reto-api","imageUri":"%s"}]\n' "$ECR_URI:$IMAGE_TAG" > imagedefinitions.json
+
 artifacts:
   files:
     - imagedefinitions.json
