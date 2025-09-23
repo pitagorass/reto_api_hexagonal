@@ -1,0 +1,20 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "CreateLogGroup",
+      "Effect": "Allow",
+      "Action": "logs:CreateLogGroup",
+      "Resource": "arn:aws:logs:us-east-1:211125755801:log-group:/aws/codebuild/*"
+    },
+    {
+      "Sid": "CreateStreamAndPutEvents",
+      "Effect": "Allow",
+      "Action": [
+        "logs:CreateLogStream",
+        "logs:PutLogEvents"
+      ],
+      "Resource": "arn:aws:logs:us-east-1:211125755801:log-group:/aws/codebuild/reto-api-build*:log-stream:*"
+    }
+  ]
+}

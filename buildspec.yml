@@ -1,26 +1,31 @@
 version: 0.2
+
 env:
   variables:
-    AWS_DEFAULT_REGION: us-east-1
+    AWS_REGION: us-east-1
+    ECR_REPO: reto-api
+
 phases:
   pre_build:
     commands:
-      - echo Logging in to Amazon ECR...
-      - aws --version
-      - $(aws ecr get-login --no-include-email --region $AWS_DEFAULT_REGION) || true
-      - IMAGE_TAG=${CODEBUILD_RESOLVED_SOURCE_VERSION:0:7}
+      - echo "Login ECR"
+      - ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+      - ECR_URI="$ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO"
+      - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_URI
+      - echo "Compute IMAGE_TAG from commit SHA"
+      - IMAGE_TAG=$(echo "$CODEBUILD_RESOLVED_SOURCE_VERSION" | cut -c1-7)
+      - echo "IMAGE_TAG=$IMAGE_TAG"
   build:
     commands:
-      - echo Building the Docker image...
-      - docker build -t reto-api:$IMAGE_TAG .
-      - docker tag reto-api:$IMAGE_TAG $ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/reto-api:$IMAGE_TAG
-      - docker tag reto-api:$IMAGE_TAG $ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/reto-api:latest
+      - echo "Build image"
+      - docker build -t $ECR_URI:$IMAGE_TAG .
+      - docker tag $ECR_URI:$IMAGE_TAG $ECR_URI:latest
   post_build:
     commands:
-      - echo Pushing the Docker image...
-      - docker push $ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/reto-api:$IMAGE_TAG
-      - docker push $ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/reto-api:latest
-      - printf '[{"name":"reto-api","imageUri":"%s"}]' "$ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/reto-api:$IMAGE_TAG" > imagedefinitions.json
+      - echo "Push image"
+      - docker push $ECR_URI:$IMAGE_TAG
+      - docker push $ECR_URI:latest
+      - printf '[{"name":"reto-api","imageUri":"%s"}]\n' "$ECR_URI:$IMAGE_TAG" > imagedefinitions.json
 artifacts:
   files:
     - imagedefinitions.json
