@@ -2,18 +2,40 @@
   "Version": "2012-10-17",
   "Statement": [
     {
+      "Sid": "ArtifactsS3",
       "Effect": "Allow",
-      "Action": [
-        "s3:GetObject",
-        "s3:GetBucketLocation",
-        "s3:PutObject",
-        "codebuild:BatchGetBuilds",
-        "codebuild:StartBuild",
-        "ecs:UpdateService",
-        "ecs:DescribeServices",
-        "iam:PassRole"
-      ],
+      "Action": ["s3:GetObject","s3:PutObject","s3:GetBucketLocation","s3:ListBucket"],
+      "Resource": [
+        "arn:aws:s3:::mi-bucket-reto-api",
+        "arn:aws:s3:::mi-bucket-reto-api/*"
+      ]
+    },
+    {
+      "Sid": "CodeBuildStart",
+      "Effect": "Allow",
+      "Action": ["codebuild:StartBuild","codebuild:BatchGetBuilds"],
       "Resource": "*"
+    },
+    {
+      "Sid": "ECSDeploy",
+      "Effect": "Allow",
+      "Action": ["ecs:UpdateService","ecs:DescribeServices","ecs:DescribeTaskDefinition","ecs:RegisterTaskDefinition"],
+      "Resource": "*"
+    },
+    {
+      "Sid": "UseConnection",
+      "Effect": "Allow",
+      "Action": ["codestar-connections:UseConnection"],
+      "Resource": "arn:aws:codeconnections:us-east-1:211125755801:connection/9361b1db-8971-49c5-8eea-3c0ab259e940"
+    },
+    {
+      "Sid": "PassCodeBuildRole",
+      "Effect": "Allow",
+      "Action": "iam:PassRole",
+      "Resource": "arn:aws:iam::211125755801:role/codebuild-reto-role",
+      "Condition": {
+        "StringEqualsIfExists": { "iam:PassedToService": "codebuild.amazonaws.com" }
+      }
     }
   ]
 }
