@@ -8,7 +8,7 @@ env:
 phases:
   pre_build:
     commands:
-      - set -euo pipefail
+      - set -eu
       - echo "== Diagnostics =="
       - echo "WHOAMI=$(whoami)"
       - echo "PWD=$(pwd)"
@@ -42,14 +42,14 @@ phases:
 
   build:
     commands:
-      - set -euo pipefail
+      - set -eu
       - echo "== Build image =="
       - docker build --pull -t "$ECR_URI:$IMAGE_TAG" .
       - docker tag "$ECR_URI:$IMAGE_TAG" "$ECR_URI:latest"
 
   post_build:
     commands:
-      - set -euo pipefail
+      - set -eu
       - echo "== Push image =="
       - docker push "$ECR_URI:$IMAGE_TAG"
       - docker push "$ECR_URI:latest"
