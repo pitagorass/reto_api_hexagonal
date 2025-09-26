@@ -1,0 +1,47 @@
+{
+  "family": "reto-api",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "256",
+  "memory": "512",
+  "executionRoleArn": "arn:aws:iam::211125755801:role/ecsTaskExecutionRole",
+  "taskRoleArn": "arn:aws:iam::211125755801:role/ecsTaskRole",
+  "containerDefinitions": [
+    {
+      "name": "reto-api",
+      "image": "211125755801.dkr.ecr.us-east-1.amazonaws.com/reto-api:latest",
+      "portMappings": [{ "containerPort": 3000, "protocol": "tcp" }],
+      "environment": [],
+      "secrets": [
+        {
+          "name": "DB_HOST",
+          "valueFrom": "arn:aws:secretsmanager:us-east-1:211125755801:secret:reto/db:DB_HOST::"
+        },
+        {
+          "name": "DB_PORT",
+          "valueFrom": "arn:aws:secretsmanager:us-east-1:211125755801:secret:reto/db:DB_PORT::"
+        },
+        {
+          "name": "DB_NAME",
+          "valueFrom": "arn:aws:secretsmanager:us-east-1:211125755801:secret:reto/db:DB_NAME::"
+        },
+        {
+          "name": "DB_USER",
+          "valueFrom": "arn:aws:secretsmanager:us-east-1:211125755801:secret:reto/db:DB_USER::"
+        },
+        {
+          "name": "DB_PASS",
+          "valueFrom": "arn:aws:secretsmanager:us-east-1:211125755801:secret:reto/db:DB_PASS::"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/reto-api",
+          "awslogs-region": "us-east-1",
+          "awslogs-stream-prefix": "ecs"
+        }
+      }
+    }
+  ]
+}
